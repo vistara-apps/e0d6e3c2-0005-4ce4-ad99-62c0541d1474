@@ -28,9 +28,17 @@ export function ThemeProvider({
   storageKey = 'zara-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage?.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(defaultTheme)
+  const [isClient, setIsClient] = useState(false)
+
+  // Load theme from localStorage on client side
+  useEffect(() => {
+    setIsClient(true)
+    const stored = localStorage?.getItem(storageKey) as Theme
+    if (stored) {
+      setTheme(stored)
+    }
+  }, [storageKey])
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -43,7 +51,9 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (theme: Theme) => {
-      localStorage?.setItem(storageKey, theme)
+      if (isClient) {
+        localStorage?.setItem(storageKey, theme)
+      }
       setTheme(theme)
     },
   }
